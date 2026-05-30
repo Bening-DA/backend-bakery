@@ -3,10 +3,11 @@ import {
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -16,20 +17,21 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({
-      where: { username: dto.username },
+    const existingEmail = await this.prisma.user.findUnique({
+      where: { email: dto.email },
     });
-    if (existing) {
-      throw new ConflictException('Username sudah digunakan');
+    if (existingEmail) {
+      throw new ConflictException('Email sudah digunakan');
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     const user = await this.prisma.user.create({
       data: {
-        username: dto.username,
+        fullName: dto.fullName,
+        email: dto.email,
         password: hashedPassword,
-        role: dto.role,
+        role: UserRole.CUSTOMER,
       },
     });
 
@@ -37,19 +39,50 @@ export class AuthService {
       message: 'Register berhasil',
       data: {
         id: user.id,
-        username: user.username,
+        fullName: user.fullName,
+        email: user.email,
         role: user.role,
       },
     };
   }
 
-  async login(username: string, password: string) {
+  async registerAdmin(dto: RegisterDto) {
+    const existingEmail = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (existingEmail) {
+      throw new ConflictException('Email sudah digunakan');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const user = await this.prisma.user.create({
+      data: {
+        fullName: dto.fullName,
+        email: dto.email,
+        password: hashedPassword,
+        role: UserRole.ADMIN,
+      },
+    });
+
+    return {
+      message: 'Register admin berhasil',
+      data: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+    };
+  }
+
+  async login(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
-      where: { username },
+      where: { email },
     });
 
     if (!user) {
-      throw new UnauthorizedException('Username tidak ditemukan');
+      throw new UnauthorizedException('Email tidak ditemukan');
     }
 
     const passwordValid = await bcrypt.compare(password, user.password);
@@ -59,7 +92,8 @@ export class AuthService {
 
     const payload = {
       sub: user.id,
-      username: user.username,
+      fullName: user.fullName,
+      email: user.email,
       role: user.role,
     };
 
@@ -68,7 +102,8 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
-        username: user.username,
+        fullName: user.fullName,
+        email: user.email,
         role: user.role,
       },
     };

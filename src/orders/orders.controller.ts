@@ -32,23 +32,36 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.KASIR, UserRole.ADMIN)
-  @ApiOperation({ summary: 'Buat pesanan baru (KASIR / ADMIN)' })
+  @ApiOperation({ summary: 'Buat pesanan baru (CUSTOMER)' })
   create(@Body() dto: CreateOrderDto, @Request() req) {
     return this.ordersService.create(dto, req.user.sub);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lihat semua pesanan, bisa filter by status' })
-  @ApiQuery({
-    name: 'status',
-    required: false,
-    enum: OrderStatus,
-    description: 'Filter berdasarkan status pesanan',
-  })
-  findAll(@Query('status') status?: OrderStatus) {
-    return this.ordersService.findAll(status);
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Lihat semua pesanan (ADMIN)' })
+  @ApiQuery({ name: 'status', required: false, enum: OrderStatus })
+  @ApiQuery({ name: 'search', required: false })
+  findAll(
+    @Query('status') status?: OrderStatus,
+    @Query('search') search?: string,
+  ) {
+    return this.ordersService.findAll(status, search);
+  }
+
+  @Get('my-orders')
+  @ApiOperation({ summary: 'Lihat history order milik saya (CUSTOMER)' })
+  findMyOrders(@Request() req) {
+    return this.ordersService.findByUser(req.user.sub);
+  }
+
+  @Get('stats')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Statistik orders (ADMIN)' })
+  getStats() {
+    return this.ordersService.getStats();
   }
 
   @Get(':id')
@@ -59,8 +72,8 @@ export class OrdersController {
 
   @Patch(':id/status')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.PRODUKSI, UserRole.KASIR, UserRole.ADMIN)
-  @ApiOperation({ summary: 'Update status pesanan (PRODUKSI / KASIR / ADMIN)' })
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Update status pesanan (ADMIN)' })
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateOrderStatusDto,

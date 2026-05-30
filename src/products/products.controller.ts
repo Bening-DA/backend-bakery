@@ -23,13 +23,11 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  // ---- KATEGORI ----
-
   @Post('categories')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Tambah kategori produk (ADMIN)' })
+  @ApiOperation({ summary: 'Tambah kategori (ADMIN)' })
   createCategory(@Body('name') name: string) {
     return this.productsService.createCategory(name);
   }
@@ -40,13 +38,11 @@ export class ProductsController {
     return this.productsService.findAllCategories();
   }
 
-  // ---- PRODUK ----
-
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Tambah produk baru (ADMIN)' })
+  @ApiOperation({ summary: 'Tambah produk (ADMIN)' })
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);
   }
@@ -58,13 +54,13 @@ export class ProductsController {
   }
 
   @Get('available')
-  @ApiOperation({ summary: 'Lihat produk yang tersedia saja' })
+  @ApiOperation({ summary: 'Lihat produk yang tersedia' })
   findAvailable() {
     return this.productsService.findAvailable();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Lihat detail produk berdasarkan ID' })
+  @ApiOperation({ summary: 'Lihat detail produk' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id);
   }

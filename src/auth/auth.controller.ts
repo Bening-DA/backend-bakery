@@ -10,14 +10,20 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  @ApiOperation({ summary: 'Daftarkan user baru (ADMIN, KASIR, atau PRODUKSI)' })
+  @ApiOperation({ summary: 'Register sebagai Customer' })
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
+  @Post('register/admin')
+  @ApiOperation({ summary: 'Register sebagai Admin' })
+  registerAdmin(@Body() dto: RegisterDto) {
+    return this.authService.registerAdmin(dto);
+  }
+
   @Post('login')
-  @ApiOperation({ summary: 'Login dan dapatkan JWT token' })
+  @ApiOperation({ summary: 'Login pakai email + password' })
   login(@Body() dto: LoginDto) {
-    return this.authService.login(dto.username, dto.password);
+    return this.authService.login(dto.email, dto.password);
   }
 }

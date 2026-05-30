@@ -1,12 +1,13 @@
 -- CreateTable
 CREATE TABLE `User` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `username` VARCHAR(191) NOT NULL,
+    `fullName` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
-    `role` ENUM('ADMIN', 'KASIR', 'PRODUKSI') NOT NULL,
+    `role` ENUM('ADMIN', 'CUSTOMER') NOT NULL DEFAULT 'CUSTOMER',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `User_username_key`(`username`),
+    UNIQUE INDEX `User_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -25,6 +26,7 @@ CREATE TABLE `Product` (
     `name` VARCHAR(191) NOT NULL,
     `price` INTEGER NOT NULL,
     `description` VARCHAR(191) NULL,
+    `image` VARCHAR(191) NULL,
     `stock` INTEGER NOT NULL DEFAULT 0,
     `isAvailable` BOOLEAN NOT NULL DEFAULT true,
     `categoryId` INTEGER NOT NULL,
@@ -38,7 +40,9 @@ CREATE TABLE `Product` (
 CREATE TABLE `Order` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `orderCode` VARCHAR(191) NOT NULL,
-    `status` ENUM('PENDING', 'DIPROSES', 'SIAP', 'SELESAI') NOT NULL DEFAULT 'PENDING',
+    `customerName` VARCHAR(191) NOT NULL,
+    `tableNumber` INTEGER NOT NULL,
+    `status` ENUM('PENDING', 'COMPLETED') NOT NULL DEFAULT 'PENDING',
     `total` INTEGER NOT NULL DEFAULT 0,
     `note` VARCHAR(191) NULL,
     `userId` INTEGER NOT NULL,
@@ -66,7 +70,7 @@ CREATE TABLE `Payment` (
     `orderId` INTEGER NOT NULL,
     `amount` INTEGER NOT NULL,
     `change` INTEGER NOT NULL,
-    `method` VARCHAR(191) NOT NULL,
+    `method` ENUM('CASH', 'QRIS', 'DEBIT_CARD') NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `Payment_orderId_key`(`orderId`),
