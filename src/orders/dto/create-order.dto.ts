@@ -20,28 +20,28 @@ export enum PaymentMethod {
 export class OrderItemDto {
   @ApiProperty({ example: 1 })
   @IsInt()
-  productId: number;
+  productId!: number;
 
   @ApiProperty({ example: 2 })
   @IsInt()
   @Min(1)
-  quantity: number;
+  quantity!: number;
 }
 
 export class CreateOrderDto {
   @ApiProperty({ example: 'John Doe' })
   @IsString()
   @IsNotEmpty()
-  customerName: string;
+  customerName!: string;
 
   @ApiProperty({ example: 5 })
   @IsInt()
   @Min(1)
-  tableNumber: number;
+  tableNumber!: number;
 
   @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.CASH })
   @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
+  paymentMethod!: PaymentMethod;
 
   @ApiPropertyOptional({ example: 'Tanpa gula' })
   @IsString()
@@ -58,5 +58,5 @@ export class CreateOrderDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
-  items: OrderItemDto[];
+  items!: OrderItemDto[];
 }

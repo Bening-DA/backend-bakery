@@ -9,5 +9,5 @@ export class UpdateOrderStatusDto {
     description: 'Status pesanan: PENDING | COMPLETED',
   })
   @IsEnum(OrderStatus)
-  status: OrderStatus;
+  status!: OrderStatus;
 }
