@@ -36,7 +36,6 @@ export class CreateOrderDto {
 
   @ApiProperty({ example: 5 })
   @IsInt()
-  @Min(1)
   tableNumber!: number;
 
   @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.CASH })

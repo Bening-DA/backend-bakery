@@ -6,7 +6,7 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { OrderStatus, PaymentMethod } from '@prisma/client';
+import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -50,6 +50,7 @@ export class OrdersService {
             amount: total,
             change: 0,
             method: dto.paymentMethod as PaymentMethod,
+            status: PaymentStatus.UNPAID,
           },
         },
       },
@@ -103,14 +104,27 @@ export class OrdersService {
 
   async updateStatus(id: number, dto: UpdateOrderStatusDto) {
     await this.findOne(id);
-    return this.prisma.order.update({
-      where: { id },
-      data: { status: dto.status },
-      include: {
-        items: { include: { product: true } },
-        payment: true,
-      },
-    });
+
+    const newPaymentStatus = dto.status === OrderStatus.COMPLETED
+      ? PaymentStatus.PAID
+      : PaymentStatus.UNPAID;
+
+    const [order] = await this.prisma.$transaction([
+      this.prisma.order.update({
+        where: { id },
+        data: { status: dto.status },
+        include: {
+          items: { include: { product: true } },
+          payment: true,
+        },
+      }),
+      this.prisma.payment.update({
+        where: { orderId: id },
+        data: { status: newPaymentStatus },
+      }),
+    ]);
+
+    return order;
   }
 
   async getStats() {

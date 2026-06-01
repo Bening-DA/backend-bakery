@@ -23,6 +23,11 @@ enum PaymentMethod {
   DEBIT_CARD
 }
 
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   fullName  String
@@ -86,6 +91,7 @@ model Payment {
   amount    Int
   change    Int
   method    PaymentMethod
+  status    PaymentStatus @default(UNPAID)
   order     Order         @relation(fields: [orderId], references: [id])
   createdAt DateTime      @default(now())
 }

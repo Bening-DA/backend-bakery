@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `payment` ADD COLUMN `status` ENUM('UNPAID', 'PAID') NOT NULL DEFAULT 'UNPAID';
